@@ -152,6 +152,22 @@ function List-BAMStateUserSettings {
     } else {
         Write-Host "Failed to create output file on the desktop."
     }
+
+    # NEW CODE: Copy folder names from Documents/My Games/Rainbow Six - Siege and construct URLs
+
+    $r6Path = [System.IO.Path]::Combine([System.Environment]::GetFolderPath('MyDocuments'), "My Games", "Rainbow Six - Siege")
+
+    if (Test-Path $r6Path) {
+        Write-Host "Found Rainbow Six - Siege folder. Retrieving folder names..."
+        $folderNames = Get-ChildItem -Path $r6Path -Directory | Select-Object -ExpandProperty Name
+        foreach ($folderName in $folderNames) {
+            $url = "https://r6.tracker.network/r6siege/profile/ubi/${folderName}"
+            Add-Content -Path $outputFile -Value "URL for folder ${folderName}: $url"
+        }
+        Write-Host "Folder URLs written to $outputFile."
+    } else {
+        Write-Host "Rainbow Six - Siege folder not found in Documents."
+    }
 }
 
 # Call the function
