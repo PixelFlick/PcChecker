@@ -74,7 +74,7 @@ function List-BAMStateUserSettings {
         Scan-RegistryPath -regPath $path
     }
 
-    # Now let's read the HKCU AppCompatFlags Compatibility Assistant Store registry key
+    # read the HKCU AppCompatFlags Compatibility Assistant Store registry key
     Write-Host "Reading HKCU AppCompatFlags Compatibility Assistant Store registry key..."
     $compatRegistryPath = "HKCU:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Compatibility Assistant\Store"
     Write-Host "Reading registry path: $compatRegistryPath"
@@ -153,7 +153,7 @@ function List-BAMStateUserSettings {
         Write-Host "Failed to create output file on the desktop."
     }
 
-    # NEW CODE: Copy folder names from Documents/My Games/Rainbow Six - Siege and construct URLs
+    # Documents/My Games/Rainbow Six - Siege and construct URLs
 
     $r6Path = [System.IO.Path]::Combine([System.Environment]::GetFolderPath('MyDocuments'), "My Games", "Rainbow Six - Siege")
 
@@ -163,10 +163,28 @@ function List-BAMStateUserSettings {
         foreach ($folderName in $folderNames) {
             $url = "https://r6.tracker.network/r6siege/profile/ubi/${folderName}"
             Add-Content -Path $outputFile -Value "URL for folder ${folderName}: $url"
+            # Open the URL
+            Start-Process $url
         }
-        Write-Host "Folder URLs written to $outputFile."
+        Write-Host "Folder URLs written to $outputFile and opened in the browser."
     } else {
         Write-Host "Rainbow Six - Siege folder not found in Documents."
+    }
+
+    # check Ubisoft Game Launcher savegames
+    $ubisoftPath = "C:\Program Files (x86)\Ubisoft\Ubisoft Game Launcher\savegames"
+    if (Test-Path $ubisoftPath) {
+        Write-Host "Found Ubisoft savegames folder. Retrieving folder names..."
+        $savegameFolders = Get-ChildItem -Path $ubisoftPath -Directory | Select-Object -ExpandProperty Name
+        foreach ($savegameFolder in $savegameFolders) {
+            $url = "https://r6.tracker.network/r6siege/profile/ubi/${savegameFolder}"
+            Add-Content -Path $outputFile -Value "URL for savegame folder ${savegameFolder}: $url"
+            # Open the URL
+            Start-Process $url
+        }
+        Write-Host "Savegame folder URLs written to $outputFile and opened in the browser."
+    } else {
+        Write-Host "Ubisoft savegames folder not found."
     }
 }
 
